@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>dixzAPK - Comic Style</title>
+
+    <meta name="theme-color" content="#ff85a2">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://i.supaimg.com/31128174-9979-4350-b3f7-961ec0bb9ac1.png">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('PWA Siap!'))
+            .catch(err => console.error('Gagal daftar SW', err));
+        });
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Patrick+Hand&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --primary-color: #ff85a2;
+            --secondary-color: #70d6ff;
+            --bg-color: #ffffff;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-style: 2px solid #333;
+            --accent-green: #4ade80;
+            --accent-purple: #a78bfa;
+            --accent-yellow: #fbbf24;
+        }
+
+        body.dark-mode {
+            --bg-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --card-bg: #34495e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image:
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+            line-height: 1.5;
+        }
+
+        /* Logo */
+        .logo {
+            font-family: 'Comic Neue', cursive;
+            font-weight: 700;
+            font-size: 1.7rem;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 0px #333;
+            letter-spacing: -0.5px;
+        }
+
+        /* Top Nav */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--card-bg);
+            border-bottom: var(--border-style);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+        }
+
+        .menu-btn {
+            cursor: pointer;
+            width: 30px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .menu-btn div { height: 3px; background: #333; border-radius: 2px; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--card-bg);
+            border-right: var(--border-style);
+            z-index: 2000;
+            padding: 20px;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+        }
+        .sidebar.active { left: 0; }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .sidebar-header h3 {
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        .back-btn {
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: #fff;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .back-btn:hover {
+            background: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .side-item {
+            margin: 10px 0;
+            padding: 12px;
+            background: #f9f9f9;
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.95rem;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .side-item:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px var(--primary-color);
+        }
+        .side-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-divider {
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            margin: 15px 0;
+            border-radius: 2px;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+        }
+
+        /* Content */
+        .content {
+            padding: 80px 16px 100px 16px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Comic Pattern Background */
+        .comic-pattern {
+            position: relative;
+            overflow: hidden;
+        }
+        .comic-pattern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(255,133,162,0.15) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(112,214,255,0.15) 0%, transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(167,139,250,0.1) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        .comic-pattern::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff85a2' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .premium-card {
+            background: var(--card-bg);
+            border: 3px solid #333;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 6px 6px 0px var(--secondary-color);
+            position: relative;
+        }
+
+        .premium-card.comic-pattern {
+            z-index: 1;
+        }
+        .premium-card.comic-pattern > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .balance-title {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .balance-amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            font-family: 'Comic Neue', cursive;
+            margin-top: 8px;
+        }
+
+        /* Wallet Icon */
+        .wallet-icon {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            fill: none;
+            stroke: #333;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: all 0.3s;
+        }
+        .wallet-icon:hover {
+            stroke: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        /* Growth Indicator */
+        .growth-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .growth-positive { color: var(--accent-green); }
+        .growth-negative { color: #ff4d4d; }
+
+        /* Schedule Grid */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .schedule-header {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            padding: 10px 4px;
+            text-align: center;
+            font-size: 0.85rem;
+            border: 2px solid #333;
+            font-family: 'Patrick Hand', cursive;
+        }
+        .schedule-cell {
+            background: #fff;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 0.85rem;
+            border: 2px solid #333;
+            color: #333;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        /* Calendar */
+        .calendar {
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 12px;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+        }
+        .calendar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112,214,255,0.2) 0%, transparent 25%),
+                radial-gradient(circle at 90% 80%, rgba(255,133,162,0.2) 0%, transparent 25%);
+            pointer-events: none;
+        }
+        .calendar > * { position: relative; z-index: 1; }
+        .cal-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .day {
+            padding: 8px 0;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .today { background: var(--secondary-color); font-weight: bold; border: 1px solid #333; }
+        .holiday { color: red; font-weight: bold; }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 92%;
+            max-width: 380px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 20px;
+            padding: 20px;
+            z-index: 3000;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.25);
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .modal h3 {
+            font-family: 'Comic Neue', cursive;
+            margin-bottom: 12px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #333;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            min-height: 44px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-comic {
+            background: var(--primary-color);
+            color: white;
+            border: 2px solid #333;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 4px 4px 0px #333;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .btn-comic:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #333;
+        }
+        .btn-comic:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px #333;
+        }
+        .btn-comic.secondary {
+            background: #ccc;
+            color: #333;
+        }
+
+        /* Target Controls */
+        .target-controls {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .btn-target {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-plus { background: var(--primary-color); color: white; }
+        .btn-minus { background: #ccc; color: #333; }
+
+        /* Modal Buttons Row */
+        .modal-buttons-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .modal-buttons-row .btn-comic {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        /* Wallet Detail */
+        .wallet-detail {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ffb6c1 100%);
+            border: 3px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            color: white;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+        }
+        .wallet-detail .label { font-size: 0.9rem; opacity: 0.9; }
+        .wallet-detail .amount {
+            font-size: 2.2rem;
+            font-weight: bold;
+            font-family: 'Comic Neue', cursive;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+        }
+
+        /* Transaction History */
+        .transaction-section {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+        .transaction-section::-webkit-scrollbar { width: 6px; }
+        .transaction-section::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9f9f9;
+            border: 2px solid #333;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .transaction-icon-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .transaction-icon-small.in { background: var(--accent-green); color: white; }
+        .transaction-icon-small.out { background: #ff4d4d; color: white; }
+        .transaction-info { flex: 1; }
+        .transaction-type { font-weight: bold; font-size: 0.95rem; }
+        .transaction-time { font-size: 0.8rem; color: #666; }
+        .transaction-amount { font-weight: bold; font-family: 'Comic Neue', cursive; }
+        .transaction-amount.in { color: var(--accent-green); }
+        .transaction-amount.out { color: #ff4d4d; }
+
+        /* DANA Style Receipt */
+        .dana-receipt {
+            background: linear-gradient(180deg, #4e54c8 0%, #8f94fb 100%);
+            border: 3px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+        }
+        .dana-receipt .dana-logo {
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .dana-receipt .success-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dana-receipt .success-icon svg { width: 32px; height: 32px; fill: var(--accent-green); }
+        .dana-receipt .receipt-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; }
+        .dana-receipt .receipt-amount { font-size: 2rem; font-weight: bold; font-family: 'Comic Neue', cursive; margin-bottom: 16px; }
+        .dana-receipt .receipt-details {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .dana-receipt .receipt-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .dana-receipt .receipt-label { opacity: 0.8; }
+        .dana-receipt .receipt-value { font-weight: 600; }
+        .dana-receipt .footer-text { margin-top: 12px; font-size: 0.8rem; opacity: 0.8; }
+
+        /* Profile Popup */
+        .profile-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 300px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 16px;
+            padding: 16px;
+            z-index: 3000;
+            text-align: center;
+        }
+        .profile-option {
+            padding: 12px;
+            margin: 6px 0;
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        .profile-option:hover { background: #f9f9f9; transform: scale(1.02); }
+        .profile-option svg { width: 20px; height: 20px; }
+
+        /* Delete Confirm */
+        .delete-confirm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 320px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            z-index: 4000;
+            text-align: center;
+        }
+        .delete-actions { display: flex; gap: 12px; margin-top: 16px; }
+        .btn-delete { flex: 1; background: #ff4d4d; color: white; border: 2px solid #333; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-cancel { flex: 1; background: #ccc; color: #333; border: 2px solid #333; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        .hidden { display: none !important; }
+
+        h2, h3 {
+            margin: 16px 0 12px 0;
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.4rem;
+        }
+
+        /* Target List Compact */
+        .target-item {
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #fafafa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .target-item:hover { background: #fff0f3; }
+        .target-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .target-item label { font-size: 0.95rem; cursor: pointer; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--card-bg);
+            border-top: var(--border-style);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .nav-container {
+            display: flex;
+            gap: 40px;
+        }
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            font-family: 'Comic Neue', cursive;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        .nav-item:hover { background: rgba(255,133,162,0.1); }
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f0;
+            border: 2px solid #333;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-icon svg { width: 22px; height: 22px; stroke: #333; fill: none; stroke-width: 2; }
+        .active-nav .nav-icon {
+            background: var(--primary-color);
+            box-shadow: 3px 3px 0px #333;
+        }
+        .active-nav .nav-icon svg { stroke: white; }
+
+        /* Profile Page Styles */
+        .profile-card-comic {
+            background: var(--card-bg);
+            border: 3px solid #333;
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 6px 6px 0px var(--primary-color);
+        }
+        .profile-card-comic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 15% 25%, rgba(255,133,162,0.2) 0%, transparent 35%),
+                radial-gradient(circle at 85% 75%, rgba(112,214,255,0.2) 0%, transparent 35%),
+                radial-gradient(circle at 50% 10%, rgba(167,139,250,0.15) 0%, transparent 30%);
+            pointer-events: none;
+        }
+        .profile-card-comic::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ff85a2' fill-opacity='0.06'%3E%3Cpath d='M20 0L40 20L20 40L0 20z'/%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        .profile-card-comic > * { position: relative; z-index: 1; }
+
+        .profile-img-comic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid #333;
+            object-fit: cover;
+            box-shadow: 4px 4px 0px var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .profile-img-comic:hover {
+            transform: scale(1.05);
+            box-shadow: 6px 6px 0px var(--secondary-color);
+        }
+
+        .profile-username {
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 12px;
+            margin-bottom: 4px;
+        }
+
+        .profile-bio {
+            font-family: 'Patrick Hand', cursive;
+            font-style: italic;
+            font-size: 1rem;
+            color: #666;
+            transform: rotate(-2deg);
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            background: rgba(255,133,162,0.1);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* Album Gallery */
+        .album-section {
+            margin-top: 20px;
+        }
+        .album-title {
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .album-title svg { width: 24px; height: 24px; }
+
+        /* Music Player */
+        .music-gallery {
+            margin-bottom: 16px;
+        }
+        .music-item {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #c4b5fd 100%);
+            border: 3px solid #333;
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        .music-item:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px #333;
+        }
+        .music-play-btn {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .music-play-btn svg { width: 20px; height: 20px; fill: var(--accent-purple); }
+        .music-info { flex: 1; }
+        .music-name { font-weight: bold; font-size: 0.95rem; }
+        .music-waveform {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 4px;
+        }
+        .music-waveform span {
+            width: 3px;
+            height: 12px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 2px;
+        }
+        .music-waveform span:nth-child(2) { height: 18px; }
+        .music-waveform span:nth-child(3) { height: 8px; }
+        .music-waveform span:nth-child(4) { height: 22px; }
+        .music-waveform span:nth-child(5) { height: 14px; }
+        .music-waveform span:nth-child(6) { height: 10px; }
+        .music-waveform span:nth-child(7) { height: 16px; }
+        .music-waveform span:nth-child(8) { height: 6px; }
+        .music-duration {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            font-family: 'Comic Neue', cursive;
+        }
+
+        /* Media Gallery Grid */
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .media-gallery::-webkit-scrollbar { width: 6px; }
+        .media-gallery::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+        .media-item {
+            aspect-ratio: 1;
+            background: #f0f0f0;
+            border: 3px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .media-item:hover {
+            transform: scale(1.02);
+            box-shadow: 4px 4px 0px var(--primary-color);
+        }
+        .media-item img, .media-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .media-item .video-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .media-item .video-indicator svg { width: 20px; height: 20px; fill: white; }
+        .media-item .delete-media-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            background: #ff4d4d;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .media-item:hover .delete-media-btn { opacity: 1; }
+        .delete-media-btn svg { width: 14px; height: 14px; stroke: white; }
+
+        /* Media Preview Modal */
+        .media-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .media-preview-modal.active { display: flex; }
+        .media-preview-content {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .media-preview-content img, .media-preview-content video {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+        .media-preview-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Audio Player Modal */
+        .audio-player-modal {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #c4b5fd 100%);
+            border: 3px solid #333;
+            border-radius: 16px;
+            padding: 16px;
+            z-index: 4500;
+            color: white;
+        }
+        .audio-player-modal.active { display: block; }
+        .audio-player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .audio-player-title { font-weight: bold; font-family: 'Comic Neue', cursive; }
+        .audio-player-close {
+            width: 28px;
+            height: 28px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: #333;
+        }
+        .audio-player-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .audio-player-btn {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .audio-player-btn svg { width: 24px; height: 24px; fill: var(--accent-purple); }
+        .audio-progress {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .audio-progress-bar {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .audio-time { font-size: 0.85rem; font-family: 'Comic Neue', cursive; }
+
+        /* Upload Options */
+        .upload-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .upload-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: #f9f9f9;
+            border: 2px solid #333;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-option:hover {
+            background: #fff0f3;
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px var(--primary-color);
+        }
+        .upload-option svg { width: 28px; height: 28px; flex-shrink: 0; }
+        .upload-option-text { font-weight: bold; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+        .empty-state svg { width: 60px; height: 60px; opacity: 0.5; margin-bottom: 12px; }
+        .empty-state p { font-size: 0.95rem; }
+
+        /* Withdraw Header */
+        .withdraw-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .withdraw-header h3 { margin: 0; }
+        .withdraw-actions { display: flex; align-items: center; gap: 12px; }
+
+        /* Notification Icon */
+        .notification-btn {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            fill: none;
+            stroke: #333;
+            stroke-width: 2;
+            transition: all 0.3s;
+        }
+        .notification-btn:hover { stroke: var(--primary-color); transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+    <nav class="top-nav">
+        <div class="logo">dixzAPK</div>
+        <div class="menu-btn" onclick="toggleSidebar()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <div class="back-btn" onclick="toggleSidebar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="side-item" onclick="toggleDarkMode()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+            Mode Gelap/Terang
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="side-item" onclick="showModal('modalUang')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            Input Uang
+        </div>
+        <div class="side-item" onclick="showModal('modalMapel')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Edit Jadwal Pelajaran
+        </div>
+        <div class="side-item" onclick="showModal('modalTarget')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Tambah Target Harian
+        </div>
+        <div class="side-item" onclick="showModal('modalCita')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Tambah Cita-Cita
+        </div>
+        <div class="side-item" onclick="showModal('modalAlbum')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+            </svg>
+            Tambahkan Album
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="side-item" onclick="exportData()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Bagikan Data
+        </div>
+        <div class="side-item" onclick="showModal('modalImport')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Masukkan Data
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalUang" class="modal">
+        <h3>Input Saldo</h3>
+        <input type="number" id="inputSaldo" placeholder="Masukkan jumlah uang...">
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="addSaldo()">Tambahkan</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalMapel" class="modal">
+        <h3>Edit Jadwal</h3>
+        <input type="text" id="editHari" placeholder="Hari (Senin-Jumat)">
+        <input type="text" id="editMataPelajaran" placeholder="Mapel (pisahkan dengan koma)">
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="updateSchedule()">Simpan</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalTarget" class="modal">
+        <h3>Target Harian</h3>
+        <div id="targetInputs">
+            <input type="text" class="target-input-field" placeholder="Target kamu...">
+        </div>
+        <div class="target-controls">
+            <button class="btn-target btn-plus" onclick="addTargetField()">+</button>
+            <button class="btn-target btn-minus" onclick="removeLastTargetField()">-</button>
+        </div>
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="saveTargets()">Simpan</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalCita" class="modal">
+        <h3>Cita-Cita</h3>
+        <input type="text" id="inputCita" placeholder="Apa cita-citamu?">
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="saveCita()">Simpan</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalWalletDetail" class="modal">
+        <h3>Dompet Saya</h3>
+        <div class="wallet-detail">
+            <div class="label">Total Saldo</div>
+            <div class="amount">Rp <span id="walletDetailAmount">0</span></div>
+        </div>
+        <div class="transaction-section" id="transactionHistory"></div>
+        <button class="btn-comic" onclick="showModal('modalWithdraw')" style="margin-top: 12px;">Tarik Uang</button>
+        <button class="btn-comic secondary" onclick="closeModal()">Tutup</button>
+    </div>
+
+    <div id="modalWithdraw" class="modal">
+        <div class="withdraw-header">
+            <h3>Tarik Uang</h3>
+            <div class="withdraw-actions">
+                <svg class="notification-btn" onclick="showTransactionHistory()" viewBox="0 0 24 24">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <button class="btn-comic secondary" onclick="closeModal()" style="padding: 8px 12px; min-height: 36px; font-size: 0.9rem; width: auto;">Batal</button>
+            </div>
+        </div>
+        <input type="number" id="withdrawAmount" placeholder="Jumlah yang ingin diambil...">
+        <div class="wallet-detail" style="margin-top: 16px;">
+            <div class="label">Saldo Tersedia</div>
+            <div class="amount" style="font-size: 1.6rem;">Rp <span id="withdrawDetailAmount">0</span></div>
+        </div>
+        <button class="btn-comic" onclick="withdrawMoney()">AMBIL</button>
+        <div class="dana-receipt" id="receipt" style="display:none; margin-top:16px;">
+            <div class="dana-logo">dixzAPK</div>
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="receipt-title">Penarikan Berhasil!</div>
+            <div class="receipt-amount">Rp <span id="receiptAmount"></span></div>
+            <div class="receipt-details">
+                <div class="receipt-row"><span class="receipt-label">ID Transaksi</span><span class="receipt-value" id="receiptId"></span></div>
+                <div class="receipt-row"><span class="receipt-label">Tanggal</span><span class="receipt-value" id="receiptDate"></span></div>
+                <div class="receipt-row"><span class="receipt-label">Waktu</span><span class="receipt-value" id="receiptTime"></span></div>
+                <div class="receipt-row"><span class="receipt-label">Sisa Saldo</span><span class="receipt-value" id="receiptBalance"></span></div>
+            </div>
+            <div class="footer-text">Terima kasih telah menggunakan dixzAPK</div>
+        </div>
+    </div>
+
+    <div id="modalLogin" class="modal">
+        <h3>Login</h3>
+        <input type="text" id="logUser" placeholder="Username">
+        <input type="password" id="logPass" placeholder="Password">
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="doLogin()">Login</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+        <p style="margin-top:12px; font-size:0.9rem; text-align:center;">
+            Belum punya akun? <a href="#" onclick="showRegister()" style="color:var(--primary-color); text-decoration:underline; font-weight:bold;">Daftar</a>
+        </p>
+    </div>
+
+    <div id="modalRegister" class="modal">
+        <h3>Daftar Akun</h3>
+        <input type="email" id="regEmail" placeholder="Email Aktif">
+        <input type="text" id="regUser" placeholder="Username">
+        <input type="password" id="regPass" placeholder="Password">
+        <input type="date" id="regBirth" placeholder="Tanggal Lahir">
+        <div style="background: #f9f9f9; padding: 12px; margin: 10px 0; border: 2px dashed #333; border-radius:10px;">
+            <span style="font-size:0.9rem;">Captcha:</span> <b id="captchaVal" style="font-family:monospace; font-size:1.2rem; letter-spacing:2px; color:var(--primary-color);"></b>
+            <input type="text" id="captchaIn" placeholder="Ketik captcha di atas" style="margin-top:8px;">
+        </div>
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="doRegister()">Daftar</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalAlbum" class="modal">
+        <h3>Upload Media</h3>
+        <div class="upload-options">
+            <div class="upload-option" onclick="triggerUpload('photo')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="upload-option-text">Upload Foto</span>
+            </div>
+            <div class="upload-option" onclick="triggerUpload('video')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--secondary-color)" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+                </svg>
+                <span class="upload-option-text">Upload Video</span>
+            </div>
+            <div class="upload-option" onclick="triggerUpload('music')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2">
+                    <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                </svg>
+                <span class="upload-option-text">Upload Musik</span>
+            </div>
+        </div>
+        <button class="btn-comic secondary" onclick="closeModal()" style="margin-top:16px;">Tutup</button>
+    </div>
+
+    <div id="modalMusicName" class="modal">
+        <h3>Nama Musik</h3>
+        <input type="text" id="musicNameInput" placeholder="Masukkan nama musik...">
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="saveMusicWithName()">Upload</button>
+            <button class="btn-comic secondary" onclick="cancelMusicUpload()">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalBio" class="modal">
+        <h3>Edit Bio</h3>
+        <textarea id="bioInput" placeholder="Tulis bio kamu..." rows="3"></textarea>
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="saveBio()">Simpan</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalImport" class="modal">
+        <h3>Import Data</h3>
+        <p style="font-size:0.9rem; margin-bottom:12px;">Pilih file data yang ingin diimpor (.json)</p>
+        <input type="file" id="importFileInput" accept=".json" style="padding:8px;">
+        <div class="modal-buttons-row">
+            <button class="btn-comic" onclick="importData()">Import</button>
+            <button class="btn-comic secondary" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+
+    <div id="profilePopup" class="profile-popup">
+        <div class="profile-option" onclick="triggerFileInput()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+            </svg>
+            Ganti Foto Profil
+        </div>
+        <div class="profile-option" onclick="showUsernameEdit()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Ganti Username
+        </div>
+        <div class="profile-option" onclick="showBioEdit()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>
+            </svg>
+            Tambahkan Bio
+        </div>
+        <button class="btn-comic secondary" style="margin-top:12px;" onclick="closeProfilePopup()">Tutup</button>
+    </div>
+
+    <div id="deleteConfirm" class="delete-confirm">
+        <h3>Yakin hapus?</h3>
+        <p id="deleteMessage">Item ini akan dihapus.</p>
+        <div class="delete-actions">
+            <button class="btn-delete" onclick="confirmDelete()">Hapus</button>
+            <button class="btn-cancel" onclick="cancelDelete()">Batal</button>
+        </div>
+    </div>
+
+    <!-- Media Preview -->
+    <div class="media-preview-modal" id="mediaPreviewModal">
+        <div class="media-preview-close" onclick="closeMediaPreview()">X</div>
+        <div class="media-preview-content" id="mediaPreviewContent"></div>
+    </div>
+
+    <!-- Audio Player -->
+    <div class="audio-player-modal" id="audioPlayerModal">
+        <div class="audio-player-header">
+            <span class="audio-player-title" id="audioPlayerTitle">Now Playing</span>
+            <div class="audio-player-close" onclick="closeAudioPlayer()">X</div>
+        </div>
+        <div class="audio-player-controls">
+            <div class="audio-player-btn" id="audioPlayBtn" onclick="toggleAudioPlay()">
+                <svg viewBox="0 0 24 24" id="audioPlayIcon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <div class="audio-progress" onclick="seekAudio(event)">
+                <div class="audio-progress-bar" id="audioProgressBar"></div>
+            </div>
+            <span class="audio-time" id="audioTime">0:00 / 0:00</span>
+        </div>
+        <audio id="audioElement"></audio>
+    </div>
+
+    <!-- Hidden File Inputs -->
+    <input type="file" id="uploadFoto" accept="image/*" style="display:none;" onchange="previewImage(event)">
+    <input type="file" id="uploadPhotoAlbum" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+    <input type="file" id="uploadVideoAlbum" accept="video/*" style="display:none;" onchange="handleVideoUpload(event)">
+    <input type="file" id="uploadMusicAlbum" accept="audio/*" style="display:none;" onchange="handleMusicUpload(event)">
+
+    <!-- Home Page -->
+    <main class="content" id="homePage">
+        <h2 id="welcomeText">Selamat datang!</h2>
+
+        <div class="premium-card comic-pattern">
+            <div class="balance-title">
+                SALDO SAYA
+                <svg class="wallet-icon" viewBox="0 0 24 24" onclick="showModal('modalWalletDetail')">
+                    <path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="M1 10h22"/><circle cx="16" cy="14" r="2"/>
+                </svg>
+            </div>
+            <div class="balance-amount">Rp <span id="displaySaldo">0</span></div>
+            <div class="growth-indicator" id="growthIndicator">
+                <span class="growth-arrow">-</span>
+                <span id="growthPercent">0%</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">dari awal</span>
+            </div>
+        </div>
+
+        <h3>Jadwal Pelajaran</h3>
+        <div class="premium-card">
+            <div class="schedule-grid" id="scheduleGrid"></div>
+        </div>
+
+        <h3>Kalender 2026</h3>
+        <div class="premium-card">
+            <div class="calendar">
+                <div class="cal-header">Januari 2026</div>
+                <div class="days-grid" id="calendarGrid"></div>
+            </div>
+            <p id="holidayDesc" style="font-size: 0.85rem; margin-top: 10px; color: #666; font-style: italic;"></p>
+        </div>
+
+        <h3>Target Harian</h3>
+        <div class="premium-card" id="targetList"></div>
+
+        <h3>Cita-Cita</h3>
+        <div class="premium-card comic-pattern" style="background: #fff0f3;">
+            <p id="displayCita" style="font-family: 'Patrick Hand'; font-size: 1.3rem; text-align: center;">Belum ditentukan</p>
+        </div>
+    </main>
+
+    <!-- Profile Page -->
+    <main class="content hidden" id="profilePage">
+        <div id="notLoggedIn">
+            <div class="premium-card" style="text-align: center;">
+                <h2>Profil</h2>
+                <p style="margin-bottom:16px;">Silakan login untuk melihat profil kamu.</p>
+                <button class="btn-comic" onclick="showModal('modalLogin')">LOGIN</button>
+            </div>
+        </div>
+
+        <div id="isLoggedIn" class="hidden">
+            <div class="profile-card-comic">
+                <img id="profilePreview" class="profile-img-comic" src="https://via.placeholder.com/100/ff85a2/333?text=Me" alt="Profile" onclick="showProfilePopup()">
+                <input type="file" id="uploadFotoProfile" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                <h2 class="profile-username" id="userProfileName">Username</h2>
+                <div class="profile-bio" id="userProfileBio">Belum ada bio</div>
+                <button class="btn-comic" onclick="doLogout()" style="background: #ff4d4d;">Logout</button>
+            </div>
+
+            <!-- Album Section -->
+            <div class="album-section">
+                <div class="album-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                    </svg>
+                    Musik
+                </div>
+                <div class="music-gallery" id="musicGallery"></div>
+
+                <div class="album-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    Foto & Video
+                </div>
+                <div class="media-gallery" id="mediaGallery"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-container">
+            <div class="nav-item active-nav" onclick="showPage('home')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <span>Beranda</span>
+            </div>
+            <div class="nav-item" onclick="showPage('profile')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <span>Profil</span>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        // State
+        let state = {
+            user: null,
+            username: "User",
+            email: "",
+            birthdate: "",
+            bio: "Belum ada bio",
+            saldo: 0,
+            initialSaldo: 0,
+            cita: "Belum ditentukan",
+            targets: [],
+            schedule: {
+                "Senin": ["-", "-"],
+                "Selasa": ["-", "-"],
+                "Rabu": ["-", "-"],
+                "Kamis": ["-", "-"],
+                "Jumat": ["-", "-"]
+            },
+            profileImg: "https://via.placeholder.com/100/ff85a2/333?text=Me",
+            transactions: [],
+            photos: [],
+            videos: [],
+            music: []
+        };
+
+        let pendingMusicFile = null;
+        let currentAudio = null;
+        let deleteItemIndex = -1;
+        let deleteItemType = '';
+        let deleteMediaType = '';
+
+        // Accounts storage
+        function getAccounts() {
+            return JSON.parse(localStorage.getItem('dixzapk_accounts')) || {};
+        }
+
+        function saveAccounts(accounts) {
+            localStorage.setItem('dixzapk_accounts', JSON.stringify(accounts));
+        }
+
+        function getCurrentUser() {
+            return localStorage.getItem('dixzapk_currentUser');
+        }
+
+        function setCurrentUser(username) {
+            localStorage.setItem('dixzapk_currentUser', username);
+        }
+
+        // Load user data
+        function loadState() {
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                const accounts = getAccounts();
+                if (accounts[currentUser]) {
+                    state = { ...state, ...accounts[currentUser] };
+                    state.user = currentUser;
+                }
+            }
+        }
+
+        // Save user data
+        function saveState() {
+            if (state.user) {
+                const accounts = getAccounts();
+                accounts[state.user] = { ...state };
+                saveAccounts(accounts);
+            }
+        }
+
+        // Init UI
+        function initUI() {
+            document.getElementById('displaySaldo').innerText = state.saldo.toLocaleString();
+            document.getElementById('walletDetailAmount').innerText = state.saldo.toLocaleString();
+            document.getElementById('withdrawDetailAmount').innerText = state.saldo.toLocaleString();
+            document.getElementById('displayCita').innerText = state.cita || "Belum ditentukan";
+            document.getElementById('profilePreview').src = state.profileImg;
+            document.getElementById('userProfileBio').innerText = state.bio || "Belum ada bio";
+
+            updateGrowthIndicator();
+
+            if (state.user) {
+                document.getElementById('welcomeText').innerText = `Selamat datang, ${state.username}!`;
+                document.getElementById('userProfileName').innerText = state.username;
+                document.getElementById('notLoggedIn').classList.add('hidden');
+                document.getElementById('isLoggedIn').classList.remove('hidden');
+            } else {
+                document.getElementById('welcomeText').innerText = "Selamat datang!";
+                document.getElementById('notLoggedIn').classList.remove('hidden');
+                document.getElementById('isLoggedIn').classList.add('hidden');
+            }
+
+            renderSchedule();
+            renderCalendar();
+            renderTargets();
+            renderTransactions();
+            renderMusicGallery();
+            renderMediaGallery();
+        }
+
+        function updateGrowthIndicator() {
+            const indicator = document.getElementById('growthIndicator');
+            const percentText = document.getElementById('growthPercent');
+            const arrow = indicator.querySelector('.growth-arrow');
+
+            if (state.initialSaldo === 0 || state.saldo === 0) {
+                percentText.innerText = "0%";
+                arrow.innerText = "-";
+                indicator.className = "growth-indicator";
+            } else {
+                const growth = ((state.saldo - state.initialSaldo) / state.initialSaldo) * 100;
+                if (growth >= 0) {
+                    percentText.innerText = `+${growth.toFixed(1)}%`;
+                    arrow.innerText = "^";
+                    indicator.className = "growth-indicator growth-positive";
+                } else {
+                    percentText.innerText = `${growth.toFixed(1)}%`;
+                    arrow.innerText = "v";
+                    indicator.className = "growth-indicator growth-negative";
+                }
+            }
+        }
+
+        // Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // Modals
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('receipt').style.display = 'none';
+            document.getElementById('deleteConfirm').style.display = 'none';
+            document.getElementById('profilePopup').style.display = 'none';
+        }
+
+        function showModal(id) {
+            closeSidebar();
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById(id).style.display = 'block';
+
+            if (id === 'modalRegister') genCaptcha();
+            if (id === 'modalWithdraw') {
+                document.getElementById('receipt').style.display = 'none';
+                document.getElementById('withdrawAmount').value = '';
+                document.getElementById('withdrawDetailAmount').innerText = state.saldo.toLocaleString();
+            }
+            if (id === 'modalWalletDetail') {
+                document.getElementById('walletDetailAmount').innerText = state.saldo.toLocaleString();
+                renderTransactions();
+            }
+            if (id === 'modalBio') {
+                document.getElementById('bioInput').value = state.bio !== "Belum ada bio" ? state.bio : "";
+            }
+        }
+
+        function closeAll() {
+            closeSidebar();
+            closeModal();
+        }
+
+        // Saldo
+        function addSaldo() {
+            let val = parseInt(document.getElementById('inputSaldo').value);
+            if (val && !isNaN(val) && val > 0) {
+                if (state.initialSaldo === 0) state.initialSaldo = val;
+                state.saldo += val;
+                addTransaction('Pemasukan', val, 'in');
+                saveState();
+                document.getElementById('displaySaldo').innerText = state.saldo.toLocaleString();
+                document.getElementById('inputSaldo').value = '';
+                updateGrowthIndicator();
+                closeModal();
+            } else {
+                alert("Masukkan angka yang valid!");
+            }
+        }
+
+        function addTransaction(type, amount, direction) {
+            const now = new Date();
+            state.transactions.unshift({
+                id: Math.random().toString(36).substring(2, 10).toUpperCase(),
+                type, amount, direction,
+                date: now.toLocaleDateString('id-ID'),
+                time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: now.getTime()
+            });
+            if (state.transactions.length > 50) state.transactions = state.transactions.slice(0, 50);
+        }
+
+        function renderTransactions() {
+            const container = document.getElementById('transactionHistory');
+            if (!container) return;
+
+            if (state.transactions.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">Belum ada transaksi</p>';
+                return;
+            }
+
+            container.innerHTML = state.transactions.map(t => `
+                <div class="transaction-item">
+                    <div class="transaction-icon-small ${t.direction}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            ${t.direction === 'in'
+                                ? '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'
+                                : '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>'}
+                        </svg>
+                    </div>
+                    <div class="transaction-info">
+                        <div class="transaction-type">${t.type}</div>
+                        <div class="transaction-time">${t.date} - ${t.time}</div>
+                    </div>
+                    <div class="transaction-amount ${t.direction}">
+                        ${t.direction === 'in' ? '+' : '-'}Rp ${t.amount.toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showTransactionHistory() {
+            closeModal();
+            showModal('modalWalletDetail');
+        }
+
+        function withdrawMoney() {
+            let amount = parseInt(document.getElementById('withdrawAmount').value);
+            if (!amount || amount <= 0) { alert("Masukkan jumlah valid!"); return; }
+            if (amount > state.saldo) { alert("Saldo tidak mencukupi!"); return; }
+
+            state.saldo -= amount;
+            addTransaction('Penarikan', amount, 'out');
+            saveState();
+
+            document.getElementById('displaySaldo').innerText = state.saldo.toLocaleString();
+            document.getElementById('withdrawDetailAmount').innerText = state.saldo.toLocaleString();
+            updateGrowthIndicator();
+
+            const now = new Date();
+            document.getElementById('receiptId').innerText = Math.random().toString(36).substring(2, 10).toUpperCase();
+            document.getElementById('receiptDate').innerText = now.toLocaleDateString('id-ID');
+            document.getElementById('receiptTime').innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('receiptAmount').innerText = amount.toLocaleString();
+            document.getElementById('receiptBalance').innerText = `Rp ${state.saldo.toLocaleString()}`;
+            document.getElementById('receipt').style.display = 'block';
+        }
+
+        // Schedule
+        function renderSchedule() {
+            const grid = document.getElementById('scheduleGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+            days.forEach(day => {
+                const el = document.createElement('div');
+                el.className = 'schedule-header';
+                el.innerText = day;
+                grid.appendChild(el);
+            });
+
+            const maxRow = Math.max(...Object.values(state.schedule).map(a => a.length));
+            for (let i = 0; i < Math.max(maxRow, 2); i++) {
+                days.forEach(day => {
+                    const el = document.createElement('div');
+                    el.className = 'schedule-cell';
+                    el.innerText = state.schedule[day][i] || "-";
+                    grid.appendChild(el);
+                });
+            }
+        }
+
+        function updateSchedule() {
+            let hari = document.getElementById('editHari').value.trim();
+            let mapels = document.getElementById('editMataPelajaran').value.split(',').map(m => m.trim()).filter(m => m);
+            const validDays = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+
+            if (validDays.includes(hari) && mapels.length > 0) {
+                state.schedule[hari] = mapels;
+                saveState();
+                renderSchedule();
+                document.getElementById('editHari').value = '';
+                document.getElementById('editMataPelajaran').value = '';
+                closeModal();
+            } else {
+                alert("Hari tidak valid atau mapel kosong!\nContoh: Senin\nMapel: Matematika, IPA");
+            }
+        }
+
+        // Targets
+        function addTargetField() {
+            const container = document.getElementById('targetInputs');
+            const newInput = document.createElement('input');
+            newInput.className = 'target-input-field';
+            newInput.placeholder = 'Target kamu...';
+            newInput.style.marginTop = '8px';
+            container.appendChild(newInput);
+        }
+
+        function removeLastTargetField() {
+            const inputs = document.querySelectorAll('.target-input-field');
+            if (inputs.length > 1) inputs[inputs.length - 1].remove();
+        }
+
+        function saveTargets() {
+            const inputs = document.querySelectorAll('.target-input-field');
+            state.targets = [];
+            inputs.forEach(inp => {
+                if (inp.value.trim()) state.targets.push(inp.value.trim());
+            });
+            saveState();
+            renderTargets();
+            closeModal();
+        }
+
+        function renderTargets() {
+            const list = document.getElementById('targetList');
+            if (!list) return;
+
+            if (state.targets.length === 0) {
+                list.innerHTML = "<p style='text-align:center;color:#888;padding:12px;'>Belum ada target.</p>";
+                return;
+            }
+
+            list.innerHTML = state.targets.map((t, i) => `
+                <div class="target-item" onclick="showDeleteConfirm('target', ${i}, '${t.replace(/'/g, "\\'")}')">
+                    <input type="checkbox" id="t${i}" onclick="event.stopPropagation()">
+                    <label for="t${i}">${t}</label>
+                </div>
+            `).join('');
+        }
+
+        // Cita-cita
+        function saveCita() {
+            const cita = document.getElementById('inputCita').value.trim();
+            if (cita) {
+                state.cita = cita;
+                saveState();
+                document.getElementById('displayCita').innerText = state.cita;
+                document.getElementById('inputCita').value = '';
+                closeModal();
+            } else {
+                alert("Cita-cita tidak boleh kosong!");
+            }
+        }
+
+        // Calendar
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const holidays = { 1: "Tahun Baru Masehi" };
+            const today = new Date();
+            const is2026Jan = today.getFullYear() === 2026 && today.getMonth() === 0;
+
+            for (let i = 0; i < 4; i++) grid.innerHTML += '<div></div>';
+
+            for (let d = 1; d <= 31; d++) {
+                let classes = "day";
+                if (is2026Jan && today.getDate() === d) classes += " today";
+                if (holidays[d]) classes += " holiday";
+                grid.innerHTML += `<div class="${classes}">${d}</div>`;
+            }
+            document.getElementById('holidayDesc').innerText = "1 Jan: Libur Tahun Baru";
+        }
+
+        // Page Navigation
+        function showPage(p) {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('profilePage').classList.add('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+
+            if (p === 'home') {
+                document.getElementById('homePage').classList.remove('hidden');
+                document.querySelectorAll('.nav-item')[0].classList.add('active-nav');
+            } else {
+                document.getElementById('profilePage').classList.remove('hidden');
+                document.querySelectorAll('.nav-item')[1].classList.add('active-nav');
+                renderMusicGallery();
+                renderMediaGallery();
+            }
+        }
+
+        // Auth
+        function showRegister() {
+            closeModal();
+            showModal('modalRegister');
+        }
+
+        function genCaptcha() {
+            document.getElementById('captchaVal').innerText = Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        function doRegister() {
+            const email = document.getElementById('regEmail').value.trim();
+            const u = document.getElementById('regUser').value.trim();
+            const p = document.getElementById('regPass').value;
+            const birth = document.getElementById('regBirth').value;
+            const cap = document.getElementById('captchaIn').value.trim();
+
+            if (!email || !u || !p) { alert("Email, username dan password wajib diisi!"); return; }
+            if (cap !== document.getElementById('captchaVal').innerText) { alert("Captcha salah!"); genCaptcha(); return; }
+
+            const accounts = getAccounts();
+            if (accounts[u]) { alert("Username sudah digunakan!"); return; }
+
+            // Create new account
+            accounts[u] = {
+                user: u,
+                username: u,
+                email: email,
+                birthdate: birth,
+                password: p,
+                bio: "Belum ada bio",
+                saldo: 0,
+                initialSaldo: 0,
+                cita: "Belum ditentukan",
+                targets: [],
+                schedule: {
+                    "Senin": ["-", "-"],
+                    "Selasa": ["-", "-"],
+                    "Rabu": ["-", "-"],
+                    "Kamis": ["-", "-"],
+                    "Jumat": ["-", "-"]
+                },
+                profileImg: "https://via.placeholder.com/100/ff85a2/333?text=Me",
+                transactions: [],
+                photos: [],
+                videos: [],
+                music: []
+            };
+            saveAccounts(accounts);
+
+            alert("Berhasil Daftar! Silakan Login.");
+            closeModal();
+            showModal('modalLogin');
+        }
+
+        function doLogin() {
+            const u = document.getElementById('logUser').value.trim();
+            const p = document.getElementById('logPass').value;
+            const accounts = getAccounts();
+
+            if (accounts[u] && accounts[u].password === p) {
+                setCurrentUser(u);
+                state = { ...state, ...accounts[u] };
+                state.user = u;
+                location.reload();
+            } else {
+                alert("Username atau password salah!");
+            }
+        }
+
+        function doLogout() {
+            localStorage.removeItem('dixzapk_currentUser');
+            location.reload();
+        }
+
+        // Dark Mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            closeSidebar();
+        }
+
+        // Profile
+        function showProfilePopup() {
+            if (!state.user) return;
+            document.getElementById('profilePopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closeProfilePopup() {
+            document.getElementById('profilePopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function triggerFileInput() {
+            document.getElementById('uploadFoto').click();
+            closeProfilePopup();
+        }
+
+        function previewImage(event) {
+            if (!event.target.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('profilePreview').src = reader.result;
+                state.profileImg = reader.result;
+                saveState();
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function showUsernameEdit() {
+            const newName = prompt("Masukkan username baru:", state.username);
+            if (newName && newName.trim()) {
+                const accounts = getAccounts();
+                const oldUsername = state.user;
+                const newUsername = newName.trim();
+
+                if (accounts[newUsername] && newUsername !== oldUsername) {
+                    alert("Username sudah digunakan!");
+                    return;
+                }
+
+                // Update account
+                const userData = accounts[oldUsername];
+                delete accounts[oldUsername];
+                userData.username = newUsername;
+                userData.user = newUsername;
+                accounts[newUsername] = userData;
+                saveAccounts(accounts);
+                setCurrentUser(newUsername);
+
+                state.username = newUsername;
+                state.user = newUsername;
+                document.getElementById('userProfileName').innerText = newUsername;
+                document.getElementById('welcomeText').innerText = `Selamat datang, ${newUsername}!`;
+            }
+            closeProfilePopup();
+        }
+
+        function showBioEdit() {
+            closeProfilePopup();
+            showModal('modalBio');
+        }
+
+        function saveBio() {
+            const bio = document.getElementById('bioInput').value.trim();
+            state.bio = bio || "Belum ada bio";
+            saveState();
+            document.getElementById('userProfileBio').innerText = state.bio;
+            closeModal();
+        }
+
+        // Media Upload
+        function triggerUpload(type) {
+            closeModal();
+            if (type === 'photo') document.getElementById('uploadPhotoAlbum').click();
+            else if (type === 'video') document.getElementById('uploadVideoAlbum').click();
+            else if (type === 'music') document.getElementById('uploadMusicAlbum').click();
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                state.photos.unshift({ data: reader.result, timestamp: Date.now() });
+                saveState();
+                renderMediaGallery();
+                alert("Foto berhasil diupload!");
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                state.videos.unshift({ data: reader.result, timestamp: Date.now() });
+                saveState();
+                renderMediaGallery();
+                alert("Video berhasil diupload!");
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function handleMusicUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            pendingMusicFile = file;
+            showModal('modalMusicName');
+            event.target.value = '';
+        }
+
+        function saveMusicWithName() {
+            const name = document.getElementById('musicNameInput').value.trim();
+            if (!name) { alert("Masukkan nama musik!"); return; }
+            if (!pendingMusicFile) return;
+
+            const reader = new FileReader();
+            reader.onload = function() {
+                // Get duration
+                const audio = new Audio();
+                audio.src = reader.result;
+                audio.onloadedmetadata = function() {
+                    state.music.unshift({
+                        name: name,
+                        data: reader.result,
+                        duration: Math.floor(audio.duration),
+                        timestamp: Date.now()
+                    });
+                    saveState();
+                    renderMusicGallery();
+                    alert("Musik berhasil diupload!");
+                };
+            };
+            reader.readAsDataURL(pendingMusicFile);
+            pendingMusicFile = null;
+            document.getElementById('musicNameInput').value = '';
+            closeModal();
+        }
+
+        function cancelMusicUpload() {
+            pendingMusicFile = null;
+            document.getElementById('musicNameInput').value = '';
+            closeModal();
+        }
+
+        function formatDuration(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function renderMusicGallery() {
+            const container = document.getElementById('musicGallery');
+            if (!container) return;
+
+            if (!state.music || state.music.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:20px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                        </svg>
+                        <p>Belum ada musik</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = state.music.map((m, i) => `
+                <div class="music-item" onclick="playMusic(${i})">
+                    <div class="music-play-btn">
+                        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <div class="music-info">
+                        <div class="music-name">${m.name}</div>
+                        <div class="music-waveform">
+                            <span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <div class="music-duration">${formatDuration(m.duration || 0)}</div>
+                    <div onclick="event.stopPropagation(); deleteMusic(${i})" style="cursor:pointer; padding:8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMediaGallery() {
+            const container = document.getElementById('mediaGallery');
+            if (!container) return;
+
+            const allMedia = [
+                ...(state.photos || []).map(p => ({ type: 'photo', ...p })),
+                ...(state.videos || []).map(v => ({ type: 'video', ...v }))
+            ].sort((a, b) => b.timestamp - a.timestamp);
+
+            if (allMedia.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1; padding:30px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <p>Belum ada foto atau video</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = allMedia.map((m, i) => {
+                const originalIndex = m.type === 'photo'
+                    ? state.photos.findIndex(p => p.timestamp === m.timestamp)
+                    : state.videos.findIndex(v => v.timestamp === m.timestamp);
+
+                return `
+                <div class="media-item" onclick="previewMedia('${m.type}', ${originalIndex})">
+                    ${m.type === 'photo'
+                        ? `<img src="${m.data}" alt="Photo">`
+                        : `<video src="${m.data}" muted></video>
+                           <div class="video-indicator">
+                               <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                           </div>`
+                    }
+                    <div class="delete-media-btn" onclick="event.stopPropagation(); deleteMedia('${m.type}', ${originalIndex})">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // Media Preview
+        function previewMedia(type, index) {
+            const modal = document.getElementById('mediaPreviewModal');
+            const content = document.getElementById('mediaPreviewContent');
+
+            if (type === 'photo') {
+                content.innerHTML = `<img src="${state.photos[index].data}" alt="Preview">`;
+            } else {
+                content.innerHTML = `<video src="${state.videos[index].data}" controls autoplay></video>`;
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeMediaPreview() {
+            document.getElementById('mediaPreviewModal').classList.remove('active');
+            document.getElementById('mediaPreviewContent').innerHTML = '';
+        }
+
+        // Audio Player
+        function playMusic(index) {
+            const music = state.music[index];
+            const audioElement = document.getElementById('audioElement');
+            const modal = document.getElementById('audioPlayerModal');
+
+            audioElement.src = music.data;
+            document.getElementById('audioPlayerTitle').innerText = music.name;
+            audioElement.play();
+            modal.classList.add('active');
+
+            currentAudio = audioElement;
+            updateAudioProgress();
+        }
+
+        function toggleAudioPlay() {
+            const audioElement = document.getElementById('audioElement');
+            const icon = document.getElementById('audioPlayIcon');
+
+            if (audioElement.paused) {
+                audioElement.play();
+                icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+            } else {
+                audioElement.pause();
+                icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+            }
+        }
+
+        function updateAudioProgress() {
+            const audioElement = document.getElementById('audioElement');
+            const progressBar = document.getElementById('audioProgressBar');
+            const timeDisplay = document.getElementById('audioTime');
+
+            audioElement.addEventListener('timeupdate', function() {
+                const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                progressBar.style.width = progress + '%';
+
+                const current = formatDuration(Math.floor(audioElement.currentTime));
+                const total = formatDuration(Math.floor(audioElement.duration || 0));
+                timeDisplay.innerText = `${current} / ${total}`;
+            });
+
+            audioElement.addEventListener('ended', function() {
+                document.getElementById('audioPlayIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+            });
+        }
+
+        function seekAudio(event) {
+            const audioElement = document.getElementById('audioElement');
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            audioElement.currentTime = percent * audioElement.duration;
+        }
+
+        function closeAudioPlayer() {
+            document.getElementById('audioElement').pause();
+            document.getElementById('audioPlayerModal').classList.remove('active');
+            document.getElementById('audioPlayIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+        }
+
+        // Delete functions
+        function deleteMusic(index) {
+            if (confirm("Hapus musik ini?")) {
+                state.music.splice(index, 1);
+                saveState();
+                renderMusicGallery();
+            }
+        }
+
+        function deleteMedia(type, index) {
+            if (confirm(`Hapus ${type === 'photo' ? 'foto' : 'video'} ini?`)) {
+                if (type === 'photo') state.photos.splice(index, 1);
+                else state.videos.splice(index, 1);
+                saveState();
+                renderMediaGallery();
+            }
+        }
+
+        function showDeleteConfirm(type, index, text) {
+            deleteItemType = type;
+            deleteItemIndex = index;
+            document.getElementById('deleteMessage').innerText = `"${text}" akan dihapus.`;
+            document.getElementById('deleteConfirm').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function confirmDelete() {
+            if (deleteItemType === 'target') {
+                state.targets.splice(deleteItemIndex, 1);
+                saveState();
+                renderTargets();
+            }
+            cancelDelete();
+        }
+
+        function cancelDelete() {
+            document.getElementById('deleteConfirm').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // Export/Import Data
+        function exportData() {
+            closeSidebar();
+            if (!state.user) { alert("Silakan login terlebih dahulu!"); return; }
+
+            const exportObj = {
+                version: "1.0",
+                exportDate: new Date().toISOString(),
+                data: { ...state, password: undefined }
+            };
+
+            const dataStr = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dixzAPK_backup_${state.username}_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert("Data berhasil di-export!");
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('importFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) { alert("Pilih file terlebih dahulu!"); return; }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+
+                    if (!imported.data) { alert("Format file tidak valid!"); return; }
+
+                    // Merge imported data
+                    const importedData = imported.data;
+
+                    // Keep current auth info
+                    const accounts = getAccounts();
+                    const currentUser = getCurrentUser();
+
+                    if (currentUser && accounts[currentUser]) {
+                        // Update current account with imported data (except auth)
+                        Object.keys(importedData).forEach(key => {
+                            if (key !== 'user' && key !== 'password') {
+                                state[key] = importedData[key];
+                            }
+                        });
+                        saveState();
+                        initUI();
+                        alert("Data berhasil di-import!");
+                    } else {
+                        alert("Silakan login terlebih dahulu untuk import data!");
+                    }
+                } catch (err) {
+                    alert("Gagal membaca file! Pastikan format benar.");
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            fileInput.value = '';
+            closeModal();
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            loadState();
+            initUI();
+        });
+
+        // Close preview on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMediaPreview();
+                closeAudioPlayer();
+            }
+        });
+    </script>
+</body>
+</html>
